@@ -336,10 +336,8 @@
     </div>
 
     <script>
-        // 🔒 Vercel Backend URL paste karo
-        // Example: "https://your-project-name.vercel.app/api/signal"
+        // ✅ Tumhara Exact Vercel Backend Link
         const BACKEND_URL = "https://signa-ai-1sxv.vercel.app/api/signal";
-
 
         let currentMode = 'extract';
         let selectedTone = 'Founder';
@@ -450,11 +448,6 @@
                 return;
             }
 
-            if (!BACKEND_URL || BACKEND_URL.includes("YOUR-PROJECT-NAME")) {
-                alert("Please update BACKEND_URL with your Vercel deployment link!");
-                return;
-            }
-
             const resultBox = document.getElementById('result-box');
             const resultHeader = document.getElementById('result-header');
             const resultBody = document.getElementById('result-body');
@@ -481,14 +474,13 @@
             }
 
             try {
-                // Vercel Serverless Function Call (Super Fast - Instant Response)
                 const response = await fetch(BACKEND_URL, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        model: 'llama-3.1-8b-instant', // Fast Instant Model
+                        model: 'llama-3.1-8b-instant',
                         messages: [
                             { role: 'system', content: prompt },
                             { role: 'user', content: text }
@@ -521,3 +513,4 @@
     </script>
 </body>
 </html>
+       
