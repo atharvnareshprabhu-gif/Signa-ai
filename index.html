@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signal AI — Direct Engine</title>
+    <style>
+        :root {
+            --theme-color: #0070f3;
+            --theme-border: #0070f3;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background-color: #f8fafc;
+            color: #0f172a;
+            display: flex;
+            justify-content: center;
+            padding: 20px 12px;
+            min-height: 100vh;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 440px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .brand-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .header-section {
+            text-align: center;
+        }
+
+        .subtitle-badge {
+            font-size: 0.75rem;
+            font-weight: 800;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            color: var(--theme-color);
+            margin-bottom: 4px;
+        }
+
+        .main-title {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #0f172a;
+            letter-spacing: -0.8px;
+            margin-bottom: 6px;
+        }
+
+        .tagline {
+            color: #64748b;
+            font-size: 0.95rem;
+        }
+
+        .api-key-box {
+            width: 100%;
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: 12px;
+            padding: 10px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .api-key-box label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #475569;
+        }
+
+        .api-key-box input {
+            border: 1px solid #e2e8f0;
+            padding: 8px 10px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            outline: none;
+        }
+
+        .main-card {
+            background: #ffffff;
+            border: 2px solid var(--theme-border);
+            border-radius: 16px;
+            padding: 16px;
+            width: 100%;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .main-card textarea {
+            width: 100%;
+            height: 160px;
+            border: none;
+            outline: none;
+            resize: none;
+            font-family: monospace;
+            font-size: 0.95rem;
+            color: #334155;
+            line-height: 1.5;
+        }
+
+        .action-button {
+            background: var(--theme-color);
+            color: #ffffff;
+            border: none;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .output-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 16px;
+            width: 100%;
+            display: none;
+        }
+
+        .output-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--theme-color);
+            margin-bottom: 10px;
+        }
+
+        .output-content {
+            font-size: 0.95rem;
+            color: #334155;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <div class="brand-title">Signal AI</div>
+
+        <div class="header-section">
+            <div class="subtitle-badge">DIRECT ENGINE</div>
+            <div class="main-title">Signal AI</div>
+            <div class="tagline">Cut through the noise, keep only what matters.</div>
+        </div>
+
+        <!-- Direct API Key Setup -->
+        <div class="api-key-box">
+            <label for="groq-key">🔑 GROQ API KEY</label>
+            <input type="password" id="groq-key" placeholder="gsk_xxxxxxxxxxxxxxxxxxxx" onchange="saveKeyLocal()">
+        </div>
+
+        <div class="main-card">
+            <textarea id="user-input" placeholder="Paste your long text, blog, or thread here..."></textarea>
+            <button class="action-button" onclick="processAIRequest()">Extract Signal →</button>
+        </div>
+
+        <div class="output-card" id="result-box">
+            <div class="output-title" id="result-header">RESULT</div>
+            <div class="output-content" id="result-body"></div>
+        </div>
+    </div>
+
+    <script>
+        // Load saved key if available
+        window.onload = () => {
+            const savedKey = localStorage.getItem('GROQ_USER_KEY');
+            if (savedKey) document.getElementById('groq-key').value = savedKey;
+        };
+
+        function saveKeyLocal() {
+            const key = document.getElementById('groq-key').value.trim();
+            localStorage.setItem('GROQ_USER_KEY', key);
+        }
+
+        async function processAIRequest() {
+            const keyInput = document.getElementById('groq-key').value.trim();
+            const text = document.getElementById('user-input').value.trim();
+
+            if (!keyInput) {
+                alert("Please enter your Groq API Key first!");
+                return;
+            }
+            if (!text) {
+                alert("Please paste some text!");
+                return;
+            }
+
+            saveKeyLocal();
+
+            const resultBox = document.getElementById('result-box');
+            const resultBody = document.getElementById('result-body');
+
+            resultBox.style.display = 'block';
+            resultBody.innerText = "Extracting signal from Groq engine...";
+
+            try {
+                const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${keyInput}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        model: 'llama-3.1-8b-instant',
+                        messages: [
+                            { role: 'system', content: 'Extract raw, factual signals only. Concise bullet points. No fluff.' },
+                            { role: 'user', content: text }
+                        ]
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error?.message || "Groq API Request failed!");
+                }
+
+                resultBody.innerText = data.choices[0].message.content.trim();
+
+            } catch (err) {
+                resultBody.innerText = "Error: " + err.message;
+            }
+        }
+    </script>
+</body>
+</html>
